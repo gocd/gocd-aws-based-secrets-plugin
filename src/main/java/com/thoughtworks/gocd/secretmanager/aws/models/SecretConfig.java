@@ -24,27 +24,27 @@ import java.util.Objects;
 
 public class SecretConfig {
     @Expose
-    @SerializedName("endpoint")
+    @SerializedName("Endpoint")
     @Property(name = "Endpoint", required = true)
     private String awsEndpoint;
 
     @Expose
-    @SerializedName("access_key")
+    @SerializedName("AccessKey")
     @Property(name = "AccessKey", required = true, secure = true)
     private String awsAccessKey;
 
     @Expose
-    @SerializedName("secret_access_key")
+    @SerializedName("SecretAccessKey")
     @Property(name = "SecretAccessKey", required = true, secure = true)
     private String awsSecretAccessKey;
 
     @Expose
-    @SerializedName("region")
+    @SerializedName("Region")
     @Property(name = "Region", required = true)
     private String region;
 
     @Expose
-    @SerializedName("secret_name")
+    @SerializedName("SecretName")
     @Property(name = "SecretName", required = true)
     private String secretName;
 
