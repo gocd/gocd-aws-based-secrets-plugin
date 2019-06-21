@@ -1,10 +1,6 @@
 package com.thoughtworks.gocd.secretmanager.aws;
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueRequest;
 import com.amazonaws.services.secretsmanager.model.GetSecretValueResult;
 import com.github.bdpiparva.plugin.base.executors.secrets.LookupExecutor;
@@ -25,16 +21,14 @@ import static com.github.bdpiparva.plugin.base.GsonTransformer.toJson;
 import static java.util.Collections.singletonMap;
 
 public class SecretConfigLookupExecutor extends LookupExecutor<SecretConfigRequest> {
-    private AWSSecretsManagerClientBuilder clientBuilder;
-    private AWSSecretsManager secretsManager;
+    private AWSClientFactory awsClientFactory;
 
     public SecretConfigLookupExecutor() {
-        clientBuilder = AWSSecretsManagerClientBuilder
-                .standard();
+        this(new AWSClientFactory(new AWSCredentialsProviderChain()));
     }
 
-    public SecretConfigLookupExecutor(AWSSecretsManager secretsManager) {
-        this.secretsManager = secretsManager;
+    SecretConfigLookupExecutor(AWSClientFactory awsClientFactory) {
+        this.awsClientFactory = awsClientFactory;
     }
 
     @Override
@@ -42,7 +36,7 @@ public class SecretConfigLookupExecutor extends LookupExecutor<SecretConfigReque
         AWSSecretsManager client = null;
         try {
             SecretConfig requestConfiguration = request.getConfiguration();
-            client = getClient(requestConfiguration);
+            client = awsClientFactory.client(requestConfiguration);
 
             List<String> secretIds = request.getKeys();
             if (secretIds == null || secretIds.isEmpty()) {
@@ -81,18 +75,5 @@ public class SecretConfigLookupExecutor extends LookupExecutor<SecretConfigReque
     @Override
     protected SecretConfigRequest parseRequest(String body) {
         return fromJson(body, SecretConfigRequest.class);
-    }
-
-
-    private AWSSecretsManager getClient(SecretConfig requestConfiguration) {
-        if (secretsManager == null) {
-            AwsClientBuilder.EndpointConfiguration config = new AwsClientBuilder.EndpointConfiguration(requestConfiguration.getAwsEndpoint(), requestConfiguration.getRegion());
-            AWSStaticCredentialsProvider credentialsProvider = new AWSStaticCredentialsProvider(new BasicAWSCredentials(requestConfiguration.getAwsAccessKey(), requestConfiguration.getAwsSecretAccessKey()));
-            return clientBuilder
-                    .withCredentials(credentialsProvider)
-                    .withEndpointConfiguration(config)
-                    .build();
-        }
-        return secretsManager;
     }
 }

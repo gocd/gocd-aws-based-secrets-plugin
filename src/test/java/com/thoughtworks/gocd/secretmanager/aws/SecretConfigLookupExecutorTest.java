@@ -39,20 +39,27 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.skyscreamer.jsonassert.JSONAssert.assertEquals;
 
 class SecretConfigLookupExecutorTest {
-    @Mock
-    private AWSSecretsManager secretsManager;
     private SecretConfigRequest request;
     @Mock
     GetSecretValueResult secretsResult;
+    @Mock
+    private AWSClientFactory clientFactory;
+    @Mock
+    private AWSSecretsManager secretsManager;
+    private SecretConfigLookupExecutor secretConfigLookupExecutor;
 
     @BeforeEach
     void setUp() {
         initMocks(this);
         SecretConfig secretConfig = mock(SecretConfig.class);
         request = mock(SecretConfigRequest.class);
+
+        when(clientFactory.client(secretConfig)).thenReturn(secretsManager);
         when(request.getConfiguration()).thenReturn(secretConfig);
         when(secretsResult.getSecretString()).thenReturn("{\"key1\":\"value1\",\"key2\":\"value2\"}");
         when(secretsManager.getSecretValue(any(GetSecretValueRequest.class))).thenReturn(secretsResult);
+
+        secretConfigLookupExecutor = new SecretConfigLookupExecutor(clientFactory);
     }
 
     @Test
@@ -60,8 +67,7 @@ class SecretConfigLookupExecutorTest {
         List<String> requestIds = Collections.singletonList("key1");
         when(request.getKeys()).thenReturn(requestIds);
 
-        final GoPluginApiResponse response = new SecretConfigLookupExecutor(secretsManager)
-                .execute(request);
+        final GoPluginApiResponse response = secretConfigLookupExecutor.execute(request);
 
         assertThat(response.responseCode()).isEqualTo(200);
         final String expectedResponse = "[{\"key\":\"key1\",\"value\":\"value1\"}]";
@@ -73,8 +79,7 @@ class SecretConfigLookupExecutorTest {
         List<String> requestIds = Arrays.asList("key1", "key2");
         when(request.getKeys()).thenReturn(requestIds);
 
-        final GoPluginApiResponse response = new SecretConfigLookupExecutor(secretsManager)
-                .execute(request);
+        final GoPluginApiResponse response = secretConfigLookupExecutor.execute(request);
 
         assertThat(response.responseCode()).isEqualTo(200);
         final String expectedResponse = "[{\"key\":\"key1\",\"value\":\"value1\"},{\"key\":\"key2\",\"value\":\"value2\"}]";

@@ -23,19 +23,21 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Objects;
 
 public class SecretConfig {
+    public static final String ACCESS_KEY = "AccessKey";
+    public static final String SECRET_ACCESS_KEY = "SecretAccessKey";
     @Expose
     @SerializedName("Endpoint")
     @Property(name = "Endpoint", required = true)
     private String awsEndpoint;
 
     @Expose
-    @SerializedName("AccessKey")
-    @Property(name = "AccessKey", required = true, secure = true)
+    @SerializedName(ACCESS_KEY)
+    @Property(name = "AccessKey", secure = true)
     private String awsAccessKey;
 
     @Expose
-    @SerializedName("SecretAccessKey")
-    @Property(name = "SecretAccessKey", required = true, secure = true)
+    @SerializedName(SECRET_ACCESS_KEY)
+    @Property(name = "SecretAccessKey", secure = true)
     private String awsSecretAccessKey;
 
     @Expose

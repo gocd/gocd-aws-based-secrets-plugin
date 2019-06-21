@@ -7,15 +7,18 @@ import com.thoughtworks.go.plugin.api.GoPlugin;
 import com.thoughtworks.go.plugin.api.GoPluginIdentifier;
 import com.thoughtworks.go.plugin.api.annotation.Extension;
 import com.thoughtworks.go.plugin.api.exceptions.UnhandledRequestTypeException;
+import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.plugin.api.request.GoPluginApiRequest;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 import com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig;
+import com.thoughtworks.gocd.secretmanager.aws.validators.CredentialValidator;
 
 import static java.util.Collections.singletonList;
 
 @Extension
 public class AwsPlugin implements GoPlugin {
     private RequestDispatcher requestDispatcher;
+    public final static Logger LOGGER = Logger.getLoggerFor(AwsPlugin.class);
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
@@ -25,7 +28,7 @@ public class AwsPlugin implements GoPlugin {
                 .icon("/plugin-icon.png", "image/png")
                 .configMetadata(SecretConfig.class)
                 .configView("/secrets.template.html")
-                .validateSecretConfig()
+                .validateSecretConfig(new CredentialValidator())
                 .lookup(new SecretConfigLookupExecutor())
                 .build();
     }
