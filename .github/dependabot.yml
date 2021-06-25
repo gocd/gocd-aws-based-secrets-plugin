@@ -1,0 +1,15 @@
+version: 2
+updates:
+- package-ecosystem: gradle
+  directory: "/"
+  schedule:
+    interval: weekly
+    day: friday
+  open-pull-requests-limit: 99
+  ignore:
+  - dependency-name: com.amazonaws:aws-java-sdk-secretsmanager
+    versions:
+    - "> 1.11.931, < 1.12"
+  - dependency-name: org.mockito:mockito-core
+    versions:
+    - 3.8.0
