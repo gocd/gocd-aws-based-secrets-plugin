@@ -24,7 +24,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import static com.thoughtworks.gocd.secretmanager.aws.AwsPlugin.LOGGER;
-import static org.apache.commons.lang3.StringUtils.*;
 
 public class AWSCredentialsProviderChain {
     private final List<AWSCredentialsProvider> credentialsProviders = new LinkedList<AWSCredentialsProvider>();
@@ -39,18 +38,22 @@ public class AWSCredentialsProviderChain {
     }
 
     private AWSStaticCredentialsProvider staticCredentialProvider(String accessKey, String secretKey) {
-        if (isNoneBlank(accessKey, secretKey)) {
+        if (!isBlank(accessKey) && !isBlank(secretKey)) {
             return new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
         }
 
-        if (isBlank(accessKey) && isNotBlank(secretKey)) {
+        if (isBlank(accessKey) && !isBlank(secretKey)) {
             throw new AWSCredentialsException("Access key is mandatory if secret key is provided");
         }
 
-        if (isNotBlank(accessKey) && isBlank(secretKey)) {
+        if (!isBlank(accessKey) && isBlank(secretKey)) {
             throw new AWSCredentialsException("Secret key is mandatory if access key is provided");
         }
         return null;
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     public AWSCredentialsProvider getAWSCredentialsProvider(String accessKey, String secretKey) {

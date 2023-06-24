@@ -17,6 +17,7 @@
 package com.thoughtworks.gocd.secretmanager.aws;
 
 import cd.go.plugin.base.executors.secrets.LookupExecutor;
+import com.thoughtworks.go.plugin.api.logging.Logger;
 import com.thoughtworks.go.plugin.api.response.DefaultGoPluginApiResponse;
 import com.thoughtworks.go.plugin.api.response.GoPluginApiResponse;
 import com.thoughtworks.gocd.secretmanager.aws.models.Secrets;
@@ -31,6 +32,8 @@ import static java.lang.String.format;
 import static java.util.Collections.singletonMap;
 
 public class SecretConfigLookupExecutor extends LookupExecutor<SecretConfigRequest> {
+    private static final Logger LOGGER = Logger.getLoggerFor(SecretConfigLookupExecutor.class);
+
     private AWSClientFactory awsClientFactory;
 
     public SecretConfigLookupExecutor() {

@@ -19,7 +19,6 @@ package com.thoughtworks.gocd.secretmanager.aws.models;
 import cd.go.plugin.base.annotations.Property;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -111,7 +110,7 @@ public class SecretConfig {
     }
 
     private long toLong(String valueAsString, long defaultValue) {
-        if (StringUtils.isBlank(valueAsString)) {
+        if (valueAsString == null || valueAsString.isBlank()) {
             return defaultValue;
         }
 

@@ -28,10 +28,9 @@ import com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class SecretManagerClient {
-    private AWSCredentialsProviderChain awsCredentialsProviderChain;
+    private final AWSCredentialsProviderChain awsCredentialsProviderChain;
     private final SecretCache secretCache;
     private final AWSSecretsManager awsSecretsManager;
 
@@ -47,7 +46,7 @@ public class SecretManagerClient {
     public Map lookup(String secretId) {
         String secretString = secretCache.getSecretString(secretId);
 
-        if (isNotBlank(secretString)) {
+        if (secretString != null && !secretString.isBlank()) {
             return new Gson().fromJson(secretString, Map.class);
         }
 
