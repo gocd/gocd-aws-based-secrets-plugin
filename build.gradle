@@ -65,6 +65,11 @@ dependencies {
   implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'
   implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: project.versions.awsSdk
   implementation group: 'com.amazonaws.secretsmanager', name: 'aws-secretsmanager-caching-java', version: '2.0.0'
+  constraints {
+    implementation('org.reactivestreams:reactive-streams:1.0.4') {
+      because 'Used by aws-secretments-caching-java; API was re-licensed from CC0 to MIT0 in later version which is OSI approved'
+    }
+  }
 
   testImplementation platform('org.junit:junit-bom:5.10.0')
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
