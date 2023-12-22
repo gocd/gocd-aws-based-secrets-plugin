@@ -53,7 +53,7 @@ java {
 ext {
   deps = [
     gocdPluginApi: 'cd.go.plugin:go-plugin-api:23.4.0',
-    awsSdk       : 'com.amazonaws:aws-java-sdk:1.12.619',
+    awsSdk       : 'com.amazonaws:aws-java-sdk:1.12.624',
   ]
 
   versions = project.ext.deps.collectEntries { lib, libGav -> [lib, libGav.split(':').last()] }
