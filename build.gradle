@@ -76,7 +76,7 @@ dependencies {
   testImplementation group: 'org.jsoup', name: 'jsoup', version: '1.18.1'
   testImplementation project.deps.gocdPluginApi
   testImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.3'
-  testImplementation 'uk.org.webcompere:system-stubs-jupiter:2.1.6'
+  testImplementation 'uk.org.webcompere:system-stubs-jupiter:2.1.7'
 }
 
 
