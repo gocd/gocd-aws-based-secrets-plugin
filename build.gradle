@@ -57,7 +57,7 @@ tasks.withType(JavaCompile).configureEach {
 ext {
   deps = [
     gocdPluginApi: 'cd.go.plugin:go-plugin-api:25.3.0',
-    awsSdk       : 'com.amazonaws:aws-java-sdk:1.12.788',
+    awsSdk       : 'com.amazonaws:aws-java-sdk:1.12.791',
   ]
 
   versions = project.ext.deps.collectEntries { lib, libGav -> [lib, libGav.split(':').last()] }
@@ -69,13 +69,13 @@ dependencies {
   implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: project.versions.awsSdk
   implementation group: 'com.amazonaws.secretsmanager', name: 'aws-secretsmanager-caching-java', version: '1.0.2'
 
-  testImplementation platform('org.junit:junit-bom:5.13.4')
+  testImplementation platform('org.junit:junit-bom:6.0.0')
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api'
   testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params'
   testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine'
   testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher'
-  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.27.4'
-  testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.19.0'
+  testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.27.6'
+  testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.20.0'
   testImplementation group: 'org.jsoup', name: 'jsoup', version: '1.21.2'
   testImplementation project.deps.gocdPluginApi
   testImplementation group: 'org.skyscreamer', name: 'jsonassert', version: '1.5.3'
