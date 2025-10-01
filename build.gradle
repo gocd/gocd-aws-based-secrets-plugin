@@ -19,8 +19,8 @@ apply from: "https://raw.githubusercontent.com/gocd/gocd-plugin-gradle-task-help
 
 gocdPlugin {
   id = 'com.thoughtworks.gocd.secretmanager.aws'
-  pluginVersion = '1.1.0'
-  goCdVersion = '20.9.0'
+  pluginVersion = '2.0.0'
+  goCdVersion = '22.1.0'
   name = 'AWS Secrets Manager based secrets plugin for GoCD'
   description = 'AWS Secrets Manager based secrets plugin for GoCD'
   vendorName = 'Thoughtworks, Inc.'
@@ -45,8 +45,13 @@ repositories {
   mavenLocal()
 }
 
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
 tasks.withType(JavaCompile).configureEach {
-  options.release = 11
+    options.release = 17
 }
 
 ext {
