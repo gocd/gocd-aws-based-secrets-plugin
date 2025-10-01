@@ -65,7 +65,7 @@ ext {
 
 dependencies {
   compileOnly project.deps.gocdPluginApi
-  implementation group: 'cd.go.plugin.base', name: 'gocd-plugin-base', version: '1.0.5'
+  implementation group: 'cd.go.plugin.base', name: 'gocd-plugin-base', version: '1.1.0'
   implementation group: 'com.amazonaws', name: 'aws-java-sdk-secretsmanager', version: project.versions.awsSdk
   implementation group: 'com.amazonaws.secretsmanager', name: 'aws-secretsmanager-caching-java', version: '1.0.2'
 
