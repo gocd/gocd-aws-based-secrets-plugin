@@ -68,7 +68,7 @@ ext {
 
 dependencies {
   compileOnly project.deps.gocdPluginApi
-  implementation 'cd.go.plugin.base:gocd-plugin-base:1.1.0'
+  implementation 'cd.go.plugin.base:gocd-plugin-base:1.1.1'
   implementation "com.amazonaws:aws-java-sdk-secretsmanager:${project.versions.awsSdk}"
   implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:1.1.0') {
       exclude module: 'spotbugs-annotations' // shouldnt be needed at runtime
