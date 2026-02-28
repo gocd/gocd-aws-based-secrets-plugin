@@ -16,8 +16,8 @@
 
 package com.thoughtworks.gocd.secretmanager.aws;
 
-import com.amazonaws.auth.*;
 import com.thoughtworks.gocd.secretmanager.aws.exceptions.AWSCredentialsException;
+import software.amazon.awssdk.auth.credentials.*;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -26,20 +26,20 @@ import java.util.List;
 import static com.thoughtworks.gocd.secretmanager.aws.AwsPlugin.LOGGER;
 
 public class AWSCredentialsProviderChain {
-    private final List<AWSCredentialsProvider> credentialsProviders = new LinkedList<AWSCredentialsProvider>();
+    private final List<AwsCredentialsProvider> credentialsProviders = new LinkedList<>();
 
     public AWSCredentialsProviderChain() {
-        this(new EnvironmentVariableCredentialsProvider(), new SystemPropertiesCredentialsProvider(), new InstanceProfileCredentialsProvider(false));
+        this(EnvironmentVariableCredentialsProvider.create(), SystemPropertyCredentialsProvider.create(), InstanceProfileCredentialsProvider.create());
     }
 
     //used in test
-    public AWSCredentialsProviderChain(AWSCredentialsProvider... awsCredentialsProviders) {
+    public AWSCredentialsProviderChain(AwsCredentialsProvider... awsCredentialsProviders) {
         credentialsProviders.addAll(Arrays.asList(awsCredentialsProviders));
     }
 
-    private AWSStaticCredentialsProvider staticCredentialProvider(String accessKey, String secretKey) {
+    private StaticCredentialsProvider staticCredentialProvider(String accessKey, String secretKey) {
         if (!isBlank(accessKey) && !isBlank(secretKey)) {
-            return new AWSStaticCredentialsProvider(new BasicAWSCredentials(accessKey, secretKey));
+            return StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
         }
 
         if (isBlank(accessKey) && !isBlank(secretKey)) {
@@ -56,8 +56,8 @@ public class AWSCredentialsProviderChain {
         return value == null || value.isBlank();
     }
 
-    public AWSCredentialsProvider getAWSCredentialsProvider(String accessKey, String secretKey) {
-        final AWSStaticCredentialsProvider staticCredentialProvider = staticCredentialProvider(accessKey, secretKey);
+    public AwsCredentialsProvider getAWSCredentialsProvider(String accessKey, String secretKey) {
+        final StaticCredentialsProvider staticCredentialProvider = staticCredentialProvider(accessKey, secretKey);
         if (staticCredentialProvider != null) {
             credentialsProviders.add(0, staticCredentialProvider);
         }
@@ -65,12 +65,12 @@ public class AWSCredentialsProviderChain {
         return autoDetectAWSCredentials();
     }
 
-    public AWSCredentialsProvider autoDetectAWSCredentials() {
-        for (AWSCredentialsProvider provider : credentialsProviders) {
+    public AwsCredentialsProvider autoDetectAWSCredentials() {
+        for (AwsCredentialsProvider provider : credentialsProviders) {
             try {
-                AWSCredentials credentials = provider.getCredentials();
+                AwsCredentials credentials = provider.resolveCredentials();
 
-                if (credentials.getAWSAccessKeyId() != null && credentials.getAWSSecretKey() != null) {
+                if (credentials.accessKeyId() != null && credentials.secretAccessKey() != null) {
                     LOGGER.debug("Loading credentials from " + provider.toString());
                     return provider;
                 }
