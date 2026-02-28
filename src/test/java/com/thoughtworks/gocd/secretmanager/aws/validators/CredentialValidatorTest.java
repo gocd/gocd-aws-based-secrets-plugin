@@ -16,9 +16,9 @@
 
 package com.thoughtworks.gocd.secretmanager.aws.validators;
 
+import cd.go.plugin.base.test_helper.annotations.JsonSource;
 import cd.go.plugin.base.validation.ValidationResult;
 import com.thoughtworks.gocd.secretmanager.aws.AWSCredentialsProviderChain;
-import com.thoughtworks.gocd.secretmanager.aws.annotations.JsonSource;
 import com.thoughtworks.gocd.secretmanager.aws.exceptions.AWSCredentialsException;
 import org.json.JSONException;
 import org.junit.jupiter.api.BeforeEach;

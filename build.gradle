@@ -45,7 +45,6 @@ version = gocdPlugin.fullVersion(project)
 
 repositories {
   mavenCentral()
-  mavenLocal()
 }
 
 java {
@@ -59,8 +58,9 @@ tasks.withType(JavaCompile).configureEach {
 
 ext {
   deps = [
-    gocdPluginApi: 'cd.go.plugin:go-plugin-api:25.4.0',
-    awsSdk       : 'com.amazonaws:aws-java-sdk:1.12.797',
+    gocdPluginApi : 'cd.go.plugin:go-plugin-api:25.4.0',
+    gocdPluginBase: 'cd.go.plugin.base:gocd-plugin-base:2.0.0',
+    awsSdk        : 'com.amazonaws:aws-java-sdk:1.12.797',
   ]
 
   versions = project.ext.deps.collectEntries { lib, libGav -> [lib, libGav.split(':').last()] }
@@ -68,19 +68,20 @@ ext {
 
 dependencies {
   compileOnly project.deps.gocdPluginApi
-  implementation 'cd.go.plugin.base:gocd-plugin-base:1.1.1'
+  implementation project.deps.gocdPluginBase
   implementation "com.amazonaws:aws-java-sdk-secretsmanager:${project.versions.awsSdk}"
   implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:1.1.0') {
       exclude module: 'spotbugs-annotations' // shouldnt be needed at runtime
   }
 
-  testImplementation platform('org.junit:junit-bom:6.0.2')
+  testImplementation platform('org.junit:junit-bom:6.0.3')
+  testImplementation(testFixtures(project.deps.gocdPluginBase))
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
   testImplementation 'org.assertj:assertj-core:3.27.7'
-  testImplementation 'org.mockito:mockito-core:5.21.0'
+  testImplementation 'org.mockito:mockito-core:5.22.0'
   testImplementation 'org.jsoup:jsoup:1.22.1'
   testImplementation project.deps.gocdPluginApi
   testImplementation 'org.skyscreamer:jsonassert:1.5.3'
