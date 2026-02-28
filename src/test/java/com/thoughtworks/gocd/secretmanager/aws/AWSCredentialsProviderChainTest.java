@@ -44,6 +44,11 @@ class AWSCredentialsProviderChainTest {
     @BeforeEach
     void setUp() {
         awsCredentialsProviderChain = new AWSCredentialsProviderChain(new EnvironmentVariableCredentialsProvider(), new SystemPropertiesCredentialsProvider());
+
+        env.remove(SECRET_KEY_ENV_VAR);
+        env.remove(ACCESS_KEY_ENV_VAR);
+        systemProperties.remove(SECRET_KEY_SYSTEM_PROPERTY);
+        systemProperties.remove(ACCESS_KEY_SYSTEM_PROPERTY);
     }
 
     @Test
