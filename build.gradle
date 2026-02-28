@@ -21,7 +21,7 @@ apply from: "https://raw.githubusercontent.com/gocd/gocd-plugin-gradle-task-help
 
 gocdPlugin {
   id = 'com.thoughtworks.gocd.secretmanager.aws'
-  pluginVersion = '2.0.0'
+  pluginVersion = '2.0.1'
   goCdVersion = '22.1.0'
   name = 'AWS Secrets Manager based secrets plugin for GoCD'
   description = 'AWS Secrets Manager based secrets plugin for GoCD'
@@ -73,6 +73,7 @@ dependencies {
   implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:1.1.0') {
       exclude module: 'spotbugs-annotations' // shouldnt be needed at runtime
   }
+  implementation platform('com.fasterxml.jackson:jackson-bom:2.21.1') // Control Jackson version used by AWS client
 
   testImplementation platform('org.junit:junit-bom:6.0.3')
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
