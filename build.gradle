@@ -75,7 +75,6 @@ dependencies {
   }
 
   testImplementation platform('org.junit:junit-bom:6.0.3')
-  testImplementation(testFixtures(project.deps.gocdPluginBase))
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
@@ -84,6 +83,7 @@ dependencies {
   testImplementation 'org.mockito:mockito-core:5.22.0'
   testImplementation 'org.jsoup:jsoup:1.22.1'
   testImplementation project.deps.gocdPluginApi
+  testImplementation(testFixtures(project.deps.gocdPluginBase))
   testImplementation 'org.skyscreamer:jsonassert:1.5.3'
   testImplementation 'uk.org.webcompere:system-stubs-jupiter:2.1.8'
 }
