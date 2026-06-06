@@ -16,14 +16,10 @@
 
 package com.thoughtworks.gocd.secretmanager.aws;
 
-import com.amazonaws.auth.*;
 import com.thoughtworks.gocd.secretmanager.aws.exceptions.AWSCredentialsException;
-import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.*;
 import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
 import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -35,7 +31,7 @@ public class AWSCredentialsProviderChain {
     private final List<AwsCredentialsProvider> credentialsProviders = new LinkedList<AwsCredentialsProvider>();
 
     public AWSCredentialsProviderChain() {
-        this(EnvironmentVariableCredentialsProvider.create(), new SystemPropertiesCredentialsProvider(), InstanceProfileCredentialsProvider.create());
+        this(EnvironmentVariableCredentialsProvider.create(), SystemPropertyCredentialsProvider.create(), InstanceProfileCredentialsProvider.create());
     }
 
     //used in test

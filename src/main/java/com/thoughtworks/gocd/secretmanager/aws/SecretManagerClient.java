@@ -21,9 +21,10 @@ import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
 import com.google.gson.Gson;
 import com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig;
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.awscore.client.builder.AwsSyncClientBuilder;
+import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
+import java.net.URI;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -53,16 +54,16 @@ public class SecretManagerClient {
     }
 
     private SecretsManagerClient getAwsSecretsManager(SecretConfig secretConfig) {
-        AwsSyncClientBuilder.EndpointConfiguration config = new AwsSyncClientBuilder.EndpointConfiguration(secretConfig.getAwsEndpoint(), secretConfig.getRegion());
         AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider(secretConfig.getAwsAccessKey(), secretConfig.getAwsSecretAccessKey());
         return SecretsManagerClient.builder()
                 .credentialsProvider(credentialsProvider)
-                .endpointOverride(config)
+                .region(Region.of(secretConfig.getRegion()))
+                .endpointOverride(URI.create(secretConfig.getAwsEndpoint()))
                 .build();
     }
 
     public void close() {
         secretCache.close();
-        awsSecretsManager.shutdown();
+        awsSecretsManager.close();
     }
 }
