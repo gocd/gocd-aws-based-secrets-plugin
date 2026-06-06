@@ -21,7 +21,7 @@ apply from: "https://raw.githubusercontent.com/gocd/gocd-plugin-gradle-task-help
 
 gocdPlugin {
   id = 'com.thoughtworks.gocd.secretmanager.aws'
-  pluginVersion = '2.0.1'
+  pluginVersion = '2.1.0'
   goCdVersion = '22.1.0'
   name = 'AWS Secrets Manager based secrets plugin for GoCD'
   description = 'AWS Secrets Manager based secrets plugin for GoCD'
