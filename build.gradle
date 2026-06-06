@@ -60,7 +60,6 @@ ext {
   deps = [
     gocdPluginApi : 'cd.go.plugin:go-plugin-api:25.4.0',
     gocdPluginBase: 'cd.go.plugin.base:gocd-plugin-base:2.0.1',
-    awsSdk        : 'com.amazonaws:aws-java-sdk:1.12.797',
   ]
 
   versions = project.ext.deps.collectEntries { lib, libGav -> [lib, libGav.split(':').last()] }
@@ -70,7 +69,7 @@ dependencies {
   compileOnly project.deps.gocdPluginApi
   implementation project.deps.gocdPluginBase
   implementation("software.amazon.awssdk:secretsmanager:2.46.3")
-  implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:1.1.0') {
+  implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:2.2.0') {
       exclude module: 'spotbugs-annotations' // shouldnt be needed at runtime
   }
   implementation platform('com.fasterxml.jackson:jackson-bom:2.21.4') // Control Jackson version used by AWS client
