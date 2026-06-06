@@ -45,8 +45,7 @@ class AWSClientFactoryTest {
 
     @Test
     void shouldCreateAAWSSecretManagerForGivenSecretConfig() {
-        SecretConfig secretConfig = mock(SecretConfig.class);
-        when(secretConfig.getAwsEndpoint()).thenReturn("endpoint-url");
+        SecretConfig secretConfig = new SecretConfig("https://endpoint-url", "key", "secret", "us-east-1");
 
         SecretManagerClient secretsManager = awsClientFactory.client(secretConfig);
 
@@ -56,10 +55,8 @@ class AWSClientFactoryTest {
 
     @Test
     void shouldCreateDifferentManagerForDifferentSecretConfigs() {
-        SecretConfig secretConfig1 = mock(SecretConfig.class);
-        when(secretConfig1.getAwsEndpoint()).thenReturn("url-for-secret-config-1");
-        SecretConfig secretConfig2 = mock(SecretConfig.class);
-        when(secretConfig2.getAwsEndpoint()).thenReturn("url-for-secret-config-2");
+        SecretConfig secretConfig1 = new SecretConfig("https://url-for-secret-config-1", "key", "secret", "us-east-1");
+        SecretConfig secretConfig2 = new SecretConfig("https://url-for-secret-config-2", "key", "secret", "us-east-1");
 
         SecretManagerClient secretsManager1 = awsClientFactory.client(secretConfig1);
         SecretManagerClient secretsManager2 = awsClientFactory.client(secretConfig2);
@@ -69,8 +66,7 @@ class AWSClientFactoryTest {
 
     @Test
     void shouldReturnManagerFromCacheForTheSameSecretConfig() {
-        SecretConfig secretConfig = mock(SecretConfig.class);
-        when(secretConfig.getAwsEndpoint()).thenReturn("endpoint-url");
+        SecretConfig secretConfig = new SecretConfig("https://endpoint-url", "key", "secret", "us-east-1");
 
         SecretManagerClient firstManager = awsClientFactory.client(secretConfig);
         SecretManagerClient managerFromSecondCall = awsClientFactory.client(secretConfig);
@@ -86,7 +82,7 @@ class AWSClientFactoryTest {
 
         when(cache.values()).thenReturn(singletonList(client));
 
-        new AWSClientFactory(awsCredentialsProviderChain, cache).client(new SecretConfig("end", "key", "secret"));
+        new AWSClientFactory(awsCredentialsProviderChain, cache).client(new SecretConfig("https://overridden.endpoint.example.com", "key", "secret", "us-east-1"));
 
         verify(cache).clear();
         verify(client).close();

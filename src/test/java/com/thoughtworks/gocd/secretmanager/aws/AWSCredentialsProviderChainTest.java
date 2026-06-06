@@ -16,21 +16,17 @@
 
 package com.thoughtworks.gocd.secretmanager.aws;
 
-import com.amazonaws.auth.*;
 import com.thoughtworks.gocd.secretmanager.aws.exceptions.AWSCredentialsException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider;
-import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.auth.credentials.*;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
-import static com.amazonaws.SDKGlobalConfiguration.*;
+import static com.thoughtworks.gocd.secretmanager.aws.AwsSdkNames.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -47,7 +43,7 @@ class AWSCredentialsProviderChainTest {
 
     @BeforeEach
     void setUp() {
-        awsCredentialsProviderChain = new AWSCredentialsProviderChain(EnvironmentVariableCredentialsProvider.create(), new SystemPropertiesCredentialsProvider());
+        awsCredentialsProviderChain = new AWSCredentialsProviderChain(EnvironmentVariableCredentialsProvider.create(), SystemPropertyCredentialsProvider.create());
 
         env.remove(SECRET_KEY_ENV_VAR);
         env.remove(ACCESS_KEY_ENV_VAR);
@@ -83,7 +79,7 @@ class AWSCredentialsProviderChainTest {
         systemProperties.set(ACCESS_KEY_SYSTEM_PROPERTY, "access-key-from-system-prop");
         systemProperties.set(SECRET_KEY_SYSTEM_PROPERTY, "secret-key-from-system-prop");
         final AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider(null, null);
-        assertThat(credentialsProvider).isInstanceOf(SystemPropertiesCredentialsProvider.class);
+        assertThat(credentialsProvider).isInstanceOf(SystemPropertyCredentialsProvider.class);
 
         final AwsCredentials credentials = credentialsProvider.resolveCredentials();
         assertThat(credentials.accessKeyId()).isEqualTo("access-key-from-system-prop");
