@@ -16,11 +16,11 @@
 
 package com.thoughtworks.gocd.secretmanager.aws;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
 import com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
 
 import java.util.Map;
 
@@ -40,7 +40,7 @@ class AWSClientFactoryTest {
         openMocks(this);
         awsClientFactory = new AWSClientFactory(credentialsProviderChain);
 
-        when(credentialsProviderChain.getAWSCredentialsProvider(anyString(), anyString())).thenReturn(mock(AWSCredentialsProvider.class));
+        when(credentialsProviderChain.getAWSCredentialsProvider(anyString(), anyString())).thenReturn(mock(AwsCredentialsProvider.class));
     }
 
     @Test
