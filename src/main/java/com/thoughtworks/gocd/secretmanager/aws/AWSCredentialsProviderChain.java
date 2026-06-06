@@ -31,7 +31,7 @@ public class AWSCredentialsProviderChain {
     private final List<AwsCredentialsProvider> credentialsProviders = new LinkedList<AwsCredentialsProvider>();
 
     public AWSCredentialsProviderChain() {
-        this(EnvironmentVariableCredentialsProvider.create(), SystemPropertyCredentialsProvider.create(), InstanceProfileCredentialsProvider.create());
+        this(EnvironmentVariableCredentialsProvider.create(), SystemPropertyCredentialsProvider.create(), InstanceProfileCredentialsProvider.builder().asyncCredentialUpdateEnabled(false).build());
     }
 
     //used in test
