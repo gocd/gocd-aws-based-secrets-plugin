@@ -61,10 +61,11 @@ public class SecretConfig {
 
     }
 
-    public SecretConfig(String awsEndpoint, String awsAccessKey, String awsSecretAccessKey) {
+    public SecretConfig(String awsEndpoint, String awsAccessKey, String awsSecretAccessKey, String region) {
         this.awsEndpoint = awsEndpoint;
         this.awsAccessKey = awsAccessKey;
         this.awsSecretAccessKey = awsSecretAccessKey;
+        this.region = region;
     }
 
     public String getSecretName() {

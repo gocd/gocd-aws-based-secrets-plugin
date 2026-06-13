@@ -16,15 +16,15 @@
 
 package com.thoughtworks.gocd.secretmanager.aws;
 
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.secretsmanager.caching.SecretCache;
 import com.amazonaws.secretsmanager.caching.SecretCacheConfiguration;
-import com.amazonaws.services.secretsmanager.AWSSecretsManager;
-import com.amazonaws.services.secretsmanager.AWSSecretsManagerClientBuilder;
 import com.google.gson.Gson;
 import com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig;
+import software.amazon.awssdk.auth.credentials.AwsCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
+import java.net.URI;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -32,7 +32,7 @@ import static java.util.Collections.emptyMap;
 public class SecretManagerClient {
     private final AWSCredentialsProviderChain awsCredentialsProviderChain;
     private final SecretCache secretCache;
-    private final AWSSecretsManager awsSecretsManager;
+    private final SecretsManagerClient awsSecretsManager;
 
     public SecretManagerClient(SecretConfig secretConfig, AWSCredentialsProviderChain awsCredentialsProviderChain) {
         this.awsCredentialsProviderChain = awsCredentialsProviderChain;
@@ -53,18 +53,17 @@ public class SecretManagerClient {
         return emptyMap();
     }
 
-    private AWSSecretsManager getAwsSecretsManager(SecretConfig secretConfig) {
-        AwsClientBuilder.EndpointConfiguration config = new AwsClientBuilder.EndpointConfiguration(secretConfig.getAwsEndpoint(), secretConfig.getRegion());
-        AWSCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider(secretConfig.getAwsAccessKey(), secretConfig.getAwsSecretAccessKey());
-        return AWSSecretsManagerClientBuilder
-                .standard()
-                .withCredentials(credentialsProvider)
-                .withEndpointConfiguration(config)
+    private SecretsManagerClient getAwsSecretsManager(SecretConfig secretConfig) {
+        AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider(secretConfig.getAwsAccessKey(), secretConfig.getAwsSecretAccessKey());
+        return SecretsManagerClient.builder()
+                .credentialsProvider(credentialsProvider)
+                .region(Region.of(secretConfig.getRegion()))
+                .endpointOverride(URI.create(secretConfig.getAwsEndpoint()))
                 .build();
     }
 
     public void close() {
         secretCache.close();
-        awsSecretsManager.shutdown();
+        awsSecretsManager.close();
     }
 }

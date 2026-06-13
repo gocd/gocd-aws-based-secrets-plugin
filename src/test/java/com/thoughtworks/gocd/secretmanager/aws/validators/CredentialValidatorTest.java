@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cd.go.plugin.base.GsonTransformer.toJson;
-import static com.amazonaws.SDKGlobalConfiguration.*;
+import static com.thoughtworks.gocd.secretmanager.aws.AwsSdkNames.*;
 import static com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig.ACCESS_KEY;
 import static com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig.SECRET_ACCESS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
