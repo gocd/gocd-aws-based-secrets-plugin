@@ -75,7 +75,7 @@ dependencies {
   }
   implementation platform('com.fasterxml.jackson:jackson-bom:2.18.8') // Use latest close LTS version within aws-java-sdk
 
-  testImplementation platform('org.junit:junit-bom:6.1.0')
+  testImplementation platform('org.junit:junit-bom:6.1.1')
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
