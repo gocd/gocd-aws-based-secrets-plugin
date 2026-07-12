@@ -39,6 +39,7 @@ public class SecretManagerClient {
         awsSecretsManager = getAwsSecretsManager(secretConfig);
         SecretCacheConfiguration secretCacheConfiguration = new SecretCacheConfiguration()
                 .withClient(awsSecretsManager)
+                .withPostQuantumTlsEnabled(false) // Explicitly disable for now as we will exclude the native CRT
                 .withCacheItemTTL(secretConfig.getSecretCacheTTL());
         secretCache = new SecretCache(secretCacheConfiguration);
     }

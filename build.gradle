@@ -68,11 +68,12 @@ ext {
 dependencies {
   compileOnly project.deps.gocdPluginApi
   implementation project.deps.gocdPluginBase
-  implementation("software.amazon.awssdk:secretsmanager:2.46.3")
+  implementation platform('software.amazon.awssdk:bom:2.47.6')
   implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:2.2.0') {
-      exclude module: 'spotbugs-annotations' // shouldnt be needed at runtime
+    exclude module: 'netty-nio-client' // Not using async interactions right now.
+    exclude module: 'aws-crt-client' // Huge and native; and only needed for post-quantum crypto
+    exclude module: 'spotbugs-annotations' // shouldn't be needed at runtime
   }
-  implementation platform('com.fasterxml.jackson:jackson-bom:2.18.8') // Use latest close LTS version within aws-java-sdk
 
   testImplementation platform('org.junit:junit-bom:6.1.1')
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
