@@ -21,12 +21,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import software.amazon.awssdk.auth.credentials.*;
+import software.amazon.awssdk.core.SdkSystemSetting;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
-import static com.thoughtworks.gocd.secretmanager.aws.AwsSdkNames.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
 
@@ -45,10 +45,10 @@ class AWSCredentialsProviderChainTest {
     void setUp() {
         awsCredentialsProviderChain = new AWSCredentialsProviderChain(EnvironmentVariableCredentialsProvider.create(), SystemPropertyCredentialsProvider.create());
 
-        env.remove(SECRET_KEY_ENV_VAR);
-        env.remove(ACCESS_KEY_ENV_VAR);
-        systemProperties.remove(SECRET_KEY_SYSTEM_PROPERTY);
-        systemProperties.remove(ACCESS_KEY_SYSTEM_PROPERTY);
+        env.remove(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.environmentVariable());
+        env.remove(SdkSystemSetting.AWS_ACCESS_KEY_ID.environmentVariable());
+        systemProperties.remove(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.property());
+        systemProperties.remove(SdkSystemSetting.AWS_ACCESS_KEY_ID.property());
     }
 
     @Test
@@ -64,8 +64,8 @@ class AWSCredentialsProviderChainTest {
 
     @Test
     void shouldReadCredentialsFromEnvironmentIfNotProvidedInMethodCall() {
-        env.set(SECRET_KEY_ENV_VAR, "secret-key-from-env");
-        env.set(ACCESS_KEY_ENV_VAR, "access-key-from-env");
+        env.set(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.environmentVariable(), "secret-key-from-env");
+        env.set(SdkSystemSetting.AWS_ACCESS_KEY_ID.environmentVariable(), "access-key-from-env");
         final AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider(null, null);
         assertThat(credentialsProvider).isInstanceOf(EnvironmentVariableCredentialsProvider.class);
 
@@ -76,8 +76,8 @@ class AWSCredentialsProviderChainTest {
 
     @Test
     void shouldReadCredentialsFromSystemPropertiesWhenEnvCredentialsAreNotProvided() {
-        systemProperties.set(ACCESS_KEY_SYSTEM_PROPERTY, "access-key-from-system-prop");
-        systemProperties.set(SECRET_KEY_SYSTEM_PROPERTY, "secret-key-from-system-prop");
+        systemProperties.set(SdkSystemSetting.AWS_ACCESS_KEY_ID.property(), "access-key-from-system-prop");
+        systemProperties.set(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.property(), "secret-key-from-system-prop");
         final AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider(null, null);
         assertThat(credentialsProvider).isInstanceOf(SystemPropertyCredentialsProvider.class);
 
