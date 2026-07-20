@@ -26,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.mockito.Mock;
+import software.amazon.awssdk.core.SdkSystemSetting;
 import uk.org.webcompere.systemstubs.environment.EnvironmentVariables;
 import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
@@ -35,7 +36,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cd.go.plugin.base.GsonTransformer.toJson;
-import static com.amazonaws.SDKGlobalConfiguration.*;
 import static com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig.ACCESS_KEY;
 import static com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig.SECRET_ACCESS_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -69,8 +69,8 @@ class CredentialValidatorTest {
 
     @Test
     void shouldBeValidIfCredentialsAreProvidedAsEnvironmentVariable() {
-        env.set(ACCESS_KEY_ENV_VAR, "access-key-from-env");
-        env.set(SECRET_KEY_ENV_VAR, "secret-key-from-env");
+        env.set(SdkSystemSetting.AWS_ACCESS_KEY_ID.environmentVariable(), "access-key-from-env");
+        env.set(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.environmentVariable(), "secret-key-from-env");
         ValidationResult result = credentialValidator.validate(secretConfig(null, null));
 
         assertThat(result.isEmpty()).isTrue();
@@ -78,8 +78,8 @@ class CredentialValidatorTest {
 
     @Test
     void shouldBeValidIfCredentialsAreProvidedAsSystemProperties() {
-        systemProperties.set(ACCESS_KEY_SYSTEM_PROPERTY, "access-key-from-system-prop");
-        systemProperties.set(SECRET_KEY_SYSTEM_PROPERTY, "secret-key-from-system-prop");
+        systemProperties.set(SdkSystemSetting.AWS_ACCESS_KEY_ID.property(), "access-key-from-system-prop");
+        systemProperties.set(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.property(), "secret-key-from-system-prop");
         ValidationResult result = credentialValidator.validate(secretConfig(null, null));
 
         assertThat(result.isEmpty()).isTrue();

@@ -21,8 +21,8 @@ apply from: "https://raw.githubusercontent.com/gocd/gocd-plugin-gradle-task-help
 
 gocdPlugin {
   id = 'com.thoughtworks.gocd.secretmanager.aws'
-  pluginVersion = '2.0.1'
-  goCdVersion = '22.1.0'
+  pluginVersion = '3.0.0'
+  goCdVersion = '26.2.0'
   name = 'AWS Secrets Manager based secrets plugin for GoCD'
   description = 'AWS Secrets Manager based secrets plugin for GoCD'
   vendorName = 'Thoughtworks, Inc.'
@@ -48,19 +48,18 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+  sourceCompatibility = JavaVersion.VERSION_21
+  targetCompatibility = JavaVersion.VERSION_21
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.release = 17
+  options.release = 21
 }
 
 ext {
   deps = [
-    gocdPluginApi : 'cd.go.plugin:go-plugin-api:25.4.0',
+    gocdPluginApi : 'cd.go.plugin:go-plugin-api:26.1.0',
     gocdPluginBase: 'cd.go.plugin.base:gocd-plugin-base:2.0.1',
-    awsSdk        : 'com.amazonaws:aws-java-sdk:1.12.797',
   ]
 
   versions = project.ext.deps.collectEntries { lib, libGav -> [lib, libGav.split(':').last()] }
@@ -69,13 +68,17 @@ ext {
 dependencies {
   compileOnly project.deps.gocdPluginApi
   implementation project.deps.gocdPluginBase
-  implementation "com.amazonaws:aws-java-sdk-secretsmanager:${project.versions.awsSdk}"
-  implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:1.1.0') {
-      exclude module: 'spotbugs-annotations' // shouldnt be needed at runtime
+  implementation platform('software.amazon.awssdk:bom:2.47.6')
+  implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:2.2.0') {
+    exclude module: 'netty-nio-client' // Not using async interactions right now.
+    exclude module: 'aws-crt-client' // Huge and native; and only needed for post-quantum crypto
+    exclude module: 'spotbugs-annotations' // shouldn't be needed at runtime
   }
-  implementation platform('com.fasterxml.jackson:jackson-bom:2.18.9') // Use latest close LTS version within aws-java-sdk
+  implementation('software.amazon.awssdk:sts') {
+    exclude module: 'netty-nio-client' // Not using async interactions right now.
+  }
 
-  testImplementation platform('org.junit:junit-bom:6.1.1')
+  testImplementation platform('org.junit:junit-bom:6.1.2')
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
   testImplementation 'org.junit.jupiter:junit-jupiter-params'
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'

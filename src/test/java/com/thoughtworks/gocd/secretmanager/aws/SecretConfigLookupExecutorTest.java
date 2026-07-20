@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.util.Collections.singletonList;
-import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -61,7 +60,7 @@ class SecretConfigLookupExecutorTest {
         when(request.getConfiguration()).thenReturn(secretConfig);
         when(secretConfig.getSecretName()).thenReturn("secret_id");
         when(clientFactory.client(secretConfig)).thenReturn(secretsManager);
-        when(secretsManager.lookup(any(String.class))).thenReturn(singletonMap("key1", "value1"));
+        when(secretsManager.lookup(any(String.class))).thenReturn(Map.of("key1", "value1"));
 
         final GoPluginApiResponse response = secretConfigLookupExecutor.execute(request);
 
@@ -79,7 +78,7 @@ class SecretConfigLookupExecutorTest {
         when(request.getConfiguration()).thenReturn(secretConfig);
         when(secretConfig.getSecretName()).thenReturn("secret_id");
         when(clientFactory.client(secretConfig)).thenReturn(secretsManager);
-        Map<String, String> secrets = new HashMap<>();
+        Map<Object, Object> secrets = new HashMap<>();
         secrets.put("key1", "value1");
         secrets.put("key2", "value2");
         when(secretsManager.lookup(any(String.class))).thenReturn(secrets);
@@ -104,6 +103,6 @@ class SecretConfigLookupExecutorTest {
         final GoPluginApiResponse response = secretConfigLookupExecutor.execute(request);
 
         assertThat(response.responseCode()).isEqualTo(500);
-        assertEquals("{\"message\":\"Failed to lookup secrets from AWS - error, See logs for more information.\"}", response.responseBody(), true);
+        assertThat(response.responseBody()).isEqualTo("{\"message\":\"Failed to lookup secrets from AWS - error, See logs for more information.\"}");
     }
 }

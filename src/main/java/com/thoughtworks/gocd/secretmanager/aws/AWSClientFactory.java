@@ -18,48 +18,53 @@ package com.thoughtworks.gocd.secretmanager.aws;
 
 import com.thoughtworks.gocd.secretmanager.aws.models.SecretConfig;
 
-import java.util.Map;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 public class AWSClientFactory {
-    private Map<SecretConfig, SecretManagerClient> secretManagerCache = new ConcurrentHashMap<>();
-    private AWSCredentialsProviderChain awsCredentialsProviderChain;
+    // Each client owns an LRU+TTL SecretCache that already self-bounds its cached secrets, so eviction exists
+    // only to release the SDK client (connection pool) for SecretConfigs that are no longer in use at all -
+    // e.g. after an admin edits or removes a config. We keep this window well above the secret cache item TTL
+    // (30 min by default) so that a config still in periodic use keeps its warm cache rather than being rebuilt cold.
+    static final Duration MAX_IDLE_TIME = Duration.ofHours(6);
+
+    private final ConcurrentMap<SecretConfig, SecretManagerClient> secretManagerCache;
+    private final AWSCredentialsProviderChain awsCredentialsProviderChain;
 
     public AWSClientFactory(AWSCredentialsProviderChain awsCredentialsProviderChain) {
-        this.awsCredentialsProviderChain = awsCredentialsProviderChain;
+        this(awsCredentialsProviderChain, new ConcurrentHashMap<>());
     }
 
-    protected AWSClientFactory(AWSCredentialsProviderChain awsCredentialsProviderChain, Map<SecretConfig, SecretManagerClient> cache) {
+    protected AWSClientFactory(AWSCredentialsProviderChain awsCredentialsProviderChain, ConcurrentMap<SecretConfig, SecretManagerClient> cache) {
         this.awsCredentialsProviderChain = awsCredentialsProviderChain;
-        secretManagerCache = cache;
+        this.secretManagerCache = cache;
     }
 
     public SecretManagerClient client(SecretConfig secretConfig) {
-        if (secretManagerCache.containsKey(secretConfig)) {
-            return secretManagerCache.get(secretConfig);
-        } else {
-            closeAllClientsAndClearCache();
-        }
-
-        synchronized (secretManagerCache) {
-            if (secretManagerCache.containsKey(secretConfig)) {
-                return secretManagerCache.get(secretConfig);
-            }
-
-            SecretManagerClient secretsManager = new SecretManagerClient(secretConfig, awsCredentialsProviderChain);
-            secretManagerCache.put(secretConfig, secretsManager);
-
-            return secretsManager;
-        }
+        SecretManagerClient client = secretManagerCache.computeIfAbsent(secretConfig, config -> new SecretManagerClient(config, awsCredentialsProviderChain));
+        closeIdleClientsExcept(secretConfig);
+        return client;
     }
 
     /*
-    * Currently since there is no mechanism to know if the SecretConfiguration has changed, there might be instances wherein
-    * a client is created and not closed for ever. This is a temporary mechanism to clear cache and close the client until
-    * we have a better way to know if the SecretConfig changed.
+    * Since there is no mechanism to know when a SecretConfig is no longer in use, we close and evict any client
+    * that has not been used within MAX_IDLE_TIME. The client just obtained by the caller is excluded so it is never
+    * evicted mid-request - the caller has not had a chance to lookup() (which refreshes lastUsed) yet.
     * */
-    private void closeAllClientsAndClearCache() {
-        secretManagerCache.values().forEach(SecretManagerClient::close);
-        secretManagerCache.clear();
+    private void closeIdleClientsExcept(SecretConfig current) {
+        Instant cutoff = Instant.now().minus(MAX_IDLE_TIME);
+        secretManagerCache.forEach((key, value) -> {
+            if (!current.equals(key) && value.lastUsed().isBefore(cutoff)) {
+                secretManagerCache.compute(key, (k, existing) -> {
+                    if (existing != null && existing.lastUsed().isBefore(cutoff)) {
+                        existing.close();
+                        return null;
+                    }
+                    return existing;
+                });
+            }
+        });
     }
 }
