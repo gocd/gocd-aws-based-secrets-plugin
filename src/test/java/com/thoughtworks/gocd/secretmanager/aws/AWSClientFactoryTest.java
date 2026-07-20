@@ -43,7 +43,7 @@ class AWSClientFactoryTest {
         openMocks(this);
         awsClientFactory = new AWSClientFactory(credentialsProviderChain);
 
-        when(credentialsProviderChain.getAWSCredentialsProvider(anyString(), anyString())).thenReturn(mock(AwsCredentialsProvider.class));
+        when(credentialsProviderChain.getAWSCredentialsProvider(anyString(), anyString(), nullable(String.class), nullable(String.class))).thenReturn(mock(AwsCredentialsProvider.class));
     }
 
     @Test

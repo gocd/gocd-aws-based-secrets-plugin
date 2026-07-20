@@ -18,22 +18,40 @@ package com.thoughtworks.gocd.secretmanager.aws;
 
 import com.thoughtworks.gocd.secretmanager.aws.exceptions.AWSCredentialsException;
 import software.amazon.awssdk.auth.credentials.*;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.StsClientBuilder;
+import software.amazon.awssdk.services.sts.auth.StsAssumeRoleCredentialsProvider;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.utils.SdkAutoCloseable;
 
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.thoughtworks.gocd.secretmanager.aws.AwsPlugin.LOGGER;
 
 public class AWSCredentialsProviderChain {
+    private static final String ROLE_SESSION_NAME = "gocd-aws-secrets-plugin";
+    // Documented for use within sts:ExternalId trust policy conditions; changing the format breaks existing policies.
+    public static final String EXTERNAL_ID_PREFIX = "gocd:server-id:";
+
     private final List<AwsCredentialsProvider> credentialsProviders;
+    private final Supplier<String> serverIdSupplier;
 
     public AWSCredentialsProviderChain() {
-        this(EnvironmentVariableCredentialsProvider.create(), SystemPropertyCredentialsProvider.create(), InstanceProfileCredentialsProvider.builder().asyncCredentialUpdateEnabled(false).build());
+        this(AwsPlugin::getServerId, EnvironmentVariableCredentialsProvider.create(), SystemPropertyCredentialsProvider.create(), InstanceProfileCredentialsProvider.builder().asyncCredentialUpdateEnabled(false).build());
     }
 
     //used in test
     public AWSCredentialsProviderChain(AwsCredentialsProvider... awsCredentialsProviders) {
-        credentialsProviders = List.of(awsCredentialsProviders);
+        this(AwsPlugin::getServerId, awsCredentialsProviders);
+    }
+
+    //used in test
+    public AWSCredentialsProviderChain(Supplier<String> serverIdSupplier, AwsCredentialsProvider... awsCredentialsProviders) {
+        this.serverIdSupplier = serverIdSupplier;
+        this.credentialsProviders = List.of(awsCredentialsProviders);
     }
 
     private StaticCredentialsProvider staticCredentialProvider(String accessKey, String secretKey) {
@@ -56,10 +74,15 @@ public class AWSCredentialsProviderChain {
     }
 
     public AwsCredentialsProvider getAWSCredentialsProvider(String accessKey, String secretKey) {
-        return getAwsCredentialsProviderFrom(Stream.concat(
+        return getAWSCredentialsProvider(accessKey, secretKey, null, null);
+    }
+
+    public AwsCredentialsProvider getAWSCredentialsProvider(String accessKey, String secretKey, String assumeRoleArn, String region) {
+        AwsCredentialsProvider provider = getAwsCredentialsProviderFrom(Stream.concat(
                 Stream.ofNullable(staticCredentialProvider(accessKey, secretKey)),
                 credentialsProviders.stream()).toList()
         );
+        return withAssumedRoleIfConfigured(provider, assumeRoleArn, region);
     }
 
     public AwsCredentialsProvider autoDetectAWSCredentials() {
@@ -81,5 +104,51 @@ public class AWSCredentialsProviderChain {
         }
 
         throw new AWSCredentialsException("Unable to load AWS credentials from any provider in the chain");
+    }
+
+    private AwsCredentialsProvider withAssumedRoleIfConfigured(AwsCredentialsProvider provider, String assumeRoleArn, String region) {
+        if (isBlank(assumeRoleArn)) {
+            return provider;
+        }
+
+        LOGGER.debug("Assuming role " + assumeRoleArn + " using credentials from " + provider);
+        final StsClientBuilder stsClientBuilder = StsClient.builder().credentialsProvider(provider);
+        if (!isBlank(region)) {
+            stsClientBuilder.region(Region.of(region));
+        }
+        final StsClient stsClient = stsClientBuilder.build();
+        final StsAssumeRoleCredentialsProvider assumeRoleProvider = StsAssumeRoleCredentialsProvider.builder()
+                .asyncCredentialUpdateEnabled(false)
+                .stsClient(stsClient)
+                .refreshRequest(AssumeRoleRequest.builder()
+                        .roleArn(assumeRoleArn)
+                        .roleSessionName(ROLE_SESSION_NAME)
+                        .externalId(externalId())
+                        .build())
+                .build();
+        return new AssumeRoleProviderOwningStsClient(assumeRoleProvider, stsClient);
+    }
+
+    String externalId() {
+        final String serverId = serverIdSupplier.get();
+        return isBlank(serverId) ? null : EXTERNAL_ID_PREFIX + serverId;
+    }
+
+    /**
+     * StsAssumeRoleCredentialsProvider.close() does not close a caller-supplied StsClient, so this wrapper takes
+     * ownership of both; callers that close the returned provider release every underlying resource.
+     */
+    record AssumeRoleProviderOwningStsClient(StsAssumeRoleCredentialsProvider delegate,
+                                             StsClient stsClient) implements AwsCredentialsProvider, SdkAutoCloseable {
+        @Override
+        public AwsCredentials resolveCredentials() {
+            return delegate.resolveCredentials();
+        }
+
+        @Override
+        public void close() {
+            delegate.close();
+            stsClient.close();
+        }
     }
 }

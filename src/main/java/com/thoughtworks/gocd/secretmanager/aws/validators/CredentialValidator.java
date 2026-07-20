@@ -54,11 +54,11 @@ public class CredentialValidator implements Validator {
         SecretConfig secretConfig = GsonTransformer.fromJson(GsonTransformer.toJson(requestBody), SecretConfig.class);
 
         if (isBlank(secretConfig.getAwsAccessKey())) {
-            validationResult.add(ACCESS_KEY, "Must not be blank.");
+            validationResult.add(ACCESS_KEY, "Must not be blank, since auto-detection failed.");
         }
 
         if (isBlank(secretConfig.getAwsSecretAccessKey())) {
-            validationResult.add(SECRET_ACCESS_KEY, "Must not be blank.");
+            validationResult.add(SECRET_ACCESS_KEY, "Must not be blank, since auto-detection failed.");
         }
 
         return validationResult;

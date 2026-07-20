@@ -42,6 +42,11 @@ public class SecretConfig {
     private String awsSecretAccessKey;
 
     @Expose
+    @SerializedName("AssumeRoleArn")
+    @Property(name = "AssumeRoleArn", required = false)
+    private String assumeRoleArn;
+
+    @Expose
     @SerializedName("Region")
     @Property(name = "Region", required = true)
     private String region;
@@ -88,6 +93,10 @@ public class SecretConfig {
         return awsEndpoint;
     }
 
+    public String getAssumeRoleArn() {
+        return assumeRoleArn;
+    }
+
     public long getSecretCacheTTL() {
         return toLong(secretCacheTTL, TimeUnit.MINUTES.toMillis(30));
     }
@@ -101,13 +110,14 @@ public class SecretConfig {
                 Objects.equals(awsAccessKey, that.awsAccessKey) &&
                 Objects.equals(awsSecretAccessKey, that.awsSecretAccessKey) &&
                 Objects.equals(region, that.region) &&
+                Objects.equals(assumeRoleArn, that.assumeRoleArn) &&
                 Objects.equals(secretName, that.secretName) &&
                 Objects.equals(secretCacheTTL, that.secretCacheTTL);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(awsEndpoint, awsAccessKey, awsSecretAccessKey, region, secretName, secretCacheTTL);
+        return Objects.hash(awsEndpoint, awsAccessKey, awsSecretAccessKey, region, assumeRoleArn, secretName, secretCacheTTL);
     }
 
     private long toLong(String valueAsString, long defaultValue) {

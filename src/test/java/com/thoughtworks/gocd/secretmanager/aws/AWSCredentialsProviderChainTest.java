@@ -63,6 +63,31 @@ class AWSCredentialsProviderChainTest {
     }
 
     @Test
+    void shouldNotWrapWithAssumeRoleProviderWhenAssumeRoleArnIsBlank() {
+        final AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider("access-key", "secret-key", "  ", "us-east-1");
+
+        assertThat(credentialsProvider).isInstanceOf(StaticCredentialsProvider.class);
+    }
+
+    @Test
+    void shouldWrapWithAssumeRoleProviderWhenAssumeRoleArnIsProvided() {
+        final AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider("access-key", "secret-key", "arn:aws:iam::123456789012:role/some-role", "us-east-1");
+
+        assertThat(credentialsProvider).isInstanceOf(AWSCredentialsProviderChain.AssumeRoleProviderOwningStsClient.class);
+    }
+
+    @Test
+    void shouldDeriveExternalIdFromGoCDServerId() {
+        assertThat(new AWSCredentialsProviderChain(() -> "some-server-id").externalId()).isEqualTo("gocd:server-id:some-server-id");
+    }
+
+    @Test
+    void shouldHaveNoExternalIdWhenServerIdIsNotAvailable() {
+        assertThat(new AWSCredentialsProviderChain(() -> (String) null).externalId()).isNull();
+        assertThat(new AWSCredentialsProviderChain(() -> " ").externalId()).isNull();
+    }
+
+    @Test
     void shouldReadCredentialsFromEnvironmentIfNotProvidedInMethodCall() {
         env.set(SdkSystemSetting.AWS_SECRET_ACCESS_KEY.environmentVariable(), "secret-key-from-env");
         env.set(SdkSystemSetting.AWS_ACCESS_KEY_ID.environmentVariable(), "access-key-from-env");

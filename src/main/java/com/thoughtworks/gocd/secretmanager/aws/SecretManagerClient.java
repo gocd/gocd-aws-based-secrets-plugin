@@ -59,7 +59,7 @@ public class SecretManagerClient {
     }
 
     private SecretsManagerClient getAwsSecretsManager(SecretConfig secretConfig) {
-        AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider(secretConfig.getAwsAccessKey(), secretConfig.getAwsSecretAccessKey());
+        AwsCredentialsProvider credentialsProvider = awsCredentialsProviderChain.getAWSCredentialsProvider(secretConfig.getAwsAccessKey(), secretConfig.getAwsSecretAccessKey(), secretConfig.getAssumeRoleArn(), secretConfig.getRegion());
         return SecretsManagerClient.builder()
                 .credentialsProvider(credentialsProvider)
                 .region(Region.of(secretConfig.getRegion()))

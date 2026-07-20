@@ -74,6 +74,9 @@ dependencies {
     exclude module: 'aws-crt-client' // Huge and native; and only needed for post-quantum crypto
     exclude module: 'spotbugs-annotations' // shouldn't be needed at runtime
   }
+  implementation('software.amazon.awssdk:sts') {
+    exclude module: 'netty-nio-client' // Not using async interactions right now.
+  }
 
   testImplementation platform('org.junit:junit-bom:6.1.2')
   testImplementation 'org.junit.jupiter:junit-jupiter-api'
