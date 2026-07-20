@@ -25,6 +25,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.secretsmanager.SecretsManagerClient;
 
 import java.net.URI;
+import java.time.Instant;
 import java.util.Map;
 
 import static java.util.Collections.emptyMap;
@@ -33,6 +34,7 @@ public class SecretManagerClient {
     private final AWSCredentialsProviderChain awsCredentialsProviderChain;
     private final SecretCache secretCache;
     private final SecretsManagerClient awsSecretsManager;
+    private volatile Instant lastUsed = Instant.now();
 
     public SecretManagerClient(SecretConfig secretConfig, AWSCredentialsProviderChain awsCredentialsProviderChain) {
         this.awsCredentialsProviderChain = awsCredentialsProviderChain;
@@ -44,10 +46,12 @@ public class SecretManagerClient {
         secretCache = new SecretCache(secretCacheConfiguration);
     }
 
-    public Map lookup(String secretId) {
+    public Map<Object, Object> lookup(String secretId) {
+        lastUsed = Instant.now();
         String secretString = secretCache.getSecretString(secretId);
 
         if (secretString != null && !secretString.isBlank()) {
+            //noinspection unchecked
             return new Gson().fromJson(secretString, Map.class);
         }
 
@@ -59,8 +63,17 @@ public class SecretManagerClient {
         return SecretsManagerClient.builder()
                 .credentialsProvider(credentialsProvider)
                 .region(Region.of(secretConfig.getRegion()))
-                .endpointOverride(URI.create(secretConfig.getAwsEndpoint()))
+                .endpointOverride(endpointUri(secretConfig.getAwsEndpoint()))
                 .build();
+    }
+
+    private URI endpointUri(String endpoint) {
+        URI uri = URI.create(endpoint);
+        return uri.getScheme() == null ? URI.create("https://" + endpoint) : uri;
+    }
+
+    public Instant lastUsed() {
+        return lastUsed;
     }
 
     public void close() {

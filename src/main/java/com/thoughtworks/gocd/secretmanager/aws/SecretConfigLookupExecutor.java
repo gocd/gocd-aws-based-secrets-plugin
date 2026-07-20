@@ -34,7 +34,7 @@ import static java.util.Collections.singletonMap;
 public class SecretConfigLookupExecutor extends LookupExecutor<SecretConfigRequest> {
     private static final Logger LOGGER = Logger.getLoggerFor(SecretConfigLookupExecutor.class);
 
-    private AWSClientFactory awsClientFactory;
+    private final AWSClientFactory awsClientFactory;
 
     public SecretConfigLookupExecutor() {
         this(new AWSClientFactory(new AWSCredentialsProviderChain()));
@@ -56,13 +56,14 @@ public class SecretConfigLookupExecutor extends LookupExecutor<SecretConfigReque
                 return DefaultGoPluginApiResponse.badRequest("No secret key provided!!!");
             }
 
-            Map result = client.lookup(request.getConfiguration().getSecretName());
+            Map<Object, Object> result = client.lookup(request.getConfiguration().getSecretName());
 
             final Secrets secrets = new Secrets();
 
             secretIds.forEach(secretId -> {
-                if (result.containsKey(secretId)) {
-                    secrets.add(secretId, result.get(secretId).toString());
+                Object secret = result.get(secretId);
+                if (secret != null) {
+                    secrets.add(secretId, secret.toString());
                 }
             });
 

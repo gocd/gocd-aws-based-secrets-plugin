@@ -33,8 +33,8 @@ import static java.util.Collections.singletonList;
 
 @Extension
 public class AwsPlugin implements GoPlugin {
-    private RequestDispatcher requestDispatcher;
     public final static Logger LOGGER = Logger.getLoggerFor(AwsPlugin.class);
+    private RequestDispatcher requestDispatcher;
 
     @Override
     public void initializeGoApplicationAccessor(GoApplicationAccessor goApplicationAccessor) {
