@@ -59,7 +59,7 @@ tasks.withType(JavaCompile).configureEach {
 ext {
   deps = [
     gocdPluginApi : 'cd.go.plugin:go-plugin-api:26.1.0',
-    gocdPluginBase: 'cd.go.plugin.base:gocd-plugin-base:2.0.1',
+    gocdPluginBase: 'cd.go.plugin.base:gocd-plugin-base:2.0.2',
   ]
 
   versions = project.ext.deps.collectEntries { lib, libGav -> [lib, libGav.split(':').last()] }
@@ -68,7 +68,7 @@ ext {
 dependencies {
   compileOnly project.deps.gocdPluginApi
   implementation project.deps.gocdPluginBase
-  implementation platform('software.amazon.awssdk:bom:2.48.3')
+  implementation platform('software.amazon.awssdk:bom:2.49.5')
   implementation('com.amazonaws.secretsmanager:aws-secretsmanager-caching-java:2.2.0') {
     exclude module: 'netty-nio-client' // Not using async interactions right now.
     exclude module: 'aws-crt-client' // Huge and native; and only needed for post-quantum crypto
